@@ -35,6 +35,7 @@ PACKAGE_REQUIRED_ENTRIES=(
   "scripts/site_facts.py"
   "scripts/content.py"
   "scripts/html_visibility.py"
+  "scripts/diagram_geometry.py"
   "scripts/visual.py"
   "scripts/mcp_server.py"
   "references/schemas/resume.json"

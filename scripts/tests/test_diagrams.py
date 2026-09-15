@@ -220,3 +220,59 @@ def test_mermaid_normalize_cli_reports_missing_input() -> None:
         check("mermaid_normalize CLI reports missing input without traceback",
               result.returncode == 1 and "ERROR:" in combined and "Traceback" not in combined,
               combined.strip())
+
+
+def test_architecture_geometry_contract() -> None:
+    from diagram_geometry import scan_geometry
+    base = '''<svg><rect data-node="a" x="0" y="0" width="40" height="40"/>
+    <rect data-node="b" x="120" y="0" width="40" height="40"/>
+    <line data-edge="ab" data-from="a" data-to="b" x1="44" y1="20" x2="116" y2="20"/>
+    <rect data-label-for="ab" x="60" y="10" width="40" height="10"/>
+    <text x="65" y="18">任务入队</text></svg>'''
+    check("geometry accepts a Chinese label and 4px connector standoff", not scan_geometry(base))
+    cases = [
+        (base.replace('data-to="b"', 'data-to="missing"'), "missing node"),
+        (base.replace('x="120"', 'x="20"'), "overlap"),
+        (base.replace('x1="44"', 'x1="90"'), "attach outward"),
+        (base.replace('x1="44"', 'x1="38"'), "attach outward"),
+        (base.replace('x2="116"', 'x2="44"'), "zero-length"),
+        (base.replace('x1="44"', 'x1="NaN"'), "numeric"),
+        (base.replace('x1="44"', 'x1'), "requires a numeric value"),
+        (base.replace('x1="44"', 'x1="1e999"'), "finite"),
+        (base.replace('width="40"', 'width="-40"', 1), "positive"),
+        (base.replace('data-node="b"', 'data-node="a"'), "duplicate"),
+        (base.replace('data-label-for="ab"', 'data-label-for="none"'), "matching edge"),
+        (base.replace('x="60"', 'x="30"'), "overlaps node"),
+        (base.replace('<svg>', '<svg><g transform="translate(10)">').replace('</svg>', '</g></svg>'), "direct coordinates"),
+        (base.replace('data-edge="ab"', ''), "require data-edge"),
+        (base.replace('</svg>', '<rect data-node="c" x="70" y="15" width="10" height="20"/></svg>'), "crosses node 'c'"),
+        (base.replace('</svg>', '<rect data-label-for="other" x="70" y="5" width="20" height="10"/></svg>'), "label masks"),
+    ]
+    for html, expected in cases:
+        findings = scan_geometry(html)
+        check(f"geometry rejects {expected}", any(expected in message for _, message in findings), str(findings))
+    check("unannotated Mermaid endpoints remain outside the contract", not scan_geometry('<svg><line data-from="a" data-to="b"/></svg>'))
+    branch = base.replace('</svg>', '<rect x="110" y="-10" width="60" height="160" fill="none"/>'
+                          '<rect data-node="c" x="120" y="100" width="40" height="40"/>'
+                          '<polyline data-edge="ac" data-from="a" data-to="c" points="44,30 105,30 105,120 116,120"/></svg>')
+    check("branches may cross an unmarked system boundary", not scan_geometry(branch), str(scan_geometry(branch)))
+    crossing = base.replace('</svg>', '<rect data-label-for="other" x="70" y="18" width="20" height="8"/></svg>')
+    check("edges cannot cross another label mask", any("crosses label mask" in m for _, m in scan_geometry(crossing)))
+    check("independent SVGs may reuse semantic IDs", not scan_geometry(base + base))
+    check("unmarked diagrams and comments are not interpreted as topology", not scan_geometry('<svg><!--'+base+'--></svg>'))
+    polyline = base.replace('<line data-edge="ab" data-from="a" data-to="b" x1="44" y1="20" x2="116" y2="20"/>',
+                            '<polyline data-edge="ab" data-from="a" data-to="b" points="44,20 60,20 116,20"/>')
+    check("geometry accepts multi-segment paths", not scan_geometry(polyline))
+    check("bare polyline points report an error", any("requires a numeric value" in m for _, m in scan_geometry(polyline.replace('points="44,20 60,20 116,20"', "points"))))
+    for points, expected in [('44,20 60', 'complete points'), ('44,20 20,20 116,20', 'attach outward')]:
+        bad = polyline.replace('44,20 60,20 116,20', points)
+        check(f"geometry rejects polyline {expected}", any(expected in m for _, m in scan_geometry(bad)))
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / 'filled.html'
+        path.write_text(base.replace('data-to="b"', 'data-to="missing"'))
+        check("normal lint consumes diagram geometry", any(f.rule == 'diagram-geometry' for f in scan_file(path)))
+    for name, nodes, edges in [('architecture', 5, 4), ('architecture-board', 6, 5)]:
+        source = SKILL_ROOT / 'assets' / 'diagrams' / f'{name}.html'
+        html = source.read_text()
+        check(f"{name} keeps the annotated topology", html.count('data-node=') == nodes and html.count('data-edge=') == edges)
+        check(f"{name} geometry is valid", not scan_geometry(html), str(scan_geometry(html)))

@@ -67,6 +67,11 @@ Only the entries whose role is not obvious from the filename:
 - `scripts/render.py` - the single render entry (`render_pdf`, `build_slides`, PDF
   metadata stamping). `build.py`, `verify.py`, and `mcp_server.py` all call it; never
   open a second WeasyPrint call site.
+- `scripts/diagram_geometry.py` checks annotated architecture SVG through the existing
+  lint entry points. Keep geometry in the actual rect/line/polyline attributes,
+  never a second JSON source. Mark node rectangles, edge shafts and label masks;
+  leave boundary frames and arrowheads unmarked. Static mask checks do not replace
+  rendered text-fit and arrowhead inspection.
 - `scripts/html_visibility.py` - shared static HTML/CSS visibility analysis for
   `content.py` coverage and `checks.py` residue checks. Keep its conservative
   coverage and residue modes distinct; it does not implement browser layout.
