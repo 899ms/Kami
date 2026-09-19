@@ -91,7 +91,7 @@ codex plugin add kami@kami
 
 **Claude Desktop**: download the release asset [kami.zip](https://github.com/tw93/kami/releases/latest/download/kami.zip), not GitHub's source ZIP, open Customize > Skills > "+" > Create skill, and upload it. To update, click "..." on the skill card, choose Replace, and upload the latest ZIP.
 
-Large CJK fonts stay out of every package: `scripts/ensure-fonts.sh` recovers missing Chinese or Korean fonts into the user font directory, and in a repository checkout it copies the tracked fonts into the skill so templates load them locally before falling back to the jsDelivr CDN.
+Large CJK fonts stay out of every package: `skills/kami/scripts/ensure-fonts.sh` recovers missing Chinese or Korean fonts into the user font directory, and in a repository checkout it copies the tracked fonts into the skill so templates load them locally before falling back to the jsDelivr CDN.
 
 Kami also runs a quiet version check at most once a day and tells you in chat when a newer published release is out. It writes a marker in the local XDG cache directory, then resolves GitHub's latest public release; it uploads no user document or task content and fails silently when offline or when no cache home is available.
 
@@ -117,8 +117,8 @@ The file has YAML frontmatter for structured fields like name, role, email, bran
 The defaults are a warm parchment background (`#f5f4ed`), ink-blue accents (`#1B365D`), and serif fonts. Templates use type size and spacing to separate titles, body text, and notes. You can adjust the defaults for your brand.
 
 - **Templates.** Eight document templates: One-Pager, Long Doc, Letter, Portfolio, Resume, Slides, Equity Report, and Changelog, plus a Landing Page system, in EN, CN, and KO.
-- **Diagrams.** Eighteen inline SVG types, including a report-scale architecture board. Sequence, class, and ER can be authored from Mermaid text: [beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid) renders the SVG and `scripts/mermaid_normalize.py` re-themes it to the Kami palette and makes it WeasyPrint-safe, no Node bundled.
-- **Slides.** Three rendering paths: WeasyPrint HTML to PDF by default, python-pptx for editable PPTX on request, and a Marp variant in `assets/templates/marp/` for Markdown-first decks.
+- **Diagrams.** Eighteen inline SVG types, including a report-scale architecture board. Sequence, class, and ER can be authored from Mermaid text: [beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid) renders the SVG and `skills/kami/scripts/mermaid_normalize.py` re-themes it to the Kami palette and makes it WeasyPrint-safe, no Node bundled.
+- **Slides.** Three rendering paths: WeasyPrint HTML to PDF by default, python-pptx for editable PPTX on request, and a Marp variant in `skills/kami/assets/templates/marp/` for Markdown-first decks.
 - **Code.** Pygments-based syntax highlighting when `Pygments` is installed; without it, PDFs still render and code stays monochrome.
 - **Verification.** Content schemas check structure before layout; coverage checks look for content missing from the filled page. A structured brief records the audience and requirements, and page images support the final visual review.
 - **MCP.** A zero-dependency MCP server (`skills/kami/scripts/mcp_server.py`) exposes capability diagnosis, render, structured check, and screenshot tools, so any MCP-capable agent can drive Kami as an engine without loading the full skill prompt. Render only trusted local HTML: referenced file, HTTP, and HTTPS resources load with the MCP process's permissions.

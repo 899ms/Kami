@@ -77,7 +77,7 @@ Minimum floor: web text >= 12px, PDF text >= 9pt.
 - **Line-spacing maps onto Kami tiers**: short ~1.2x → tight/dense tiers; long reading ~1.5x → reading tier. Never invent 1.6+ on a print body.
 - **Hierarchy = contrast (size / weight / space)**, not ornament. Use the next registered size step, never an in-between size or a decorative rule.
 - **Left-align body; centre only short display lines.** No centred paragraphs or lists.
-- **Do NOT import multi-weight**: the guide wants Light/Regular/Medium/Bold; Kami serif is 400 body + 500 headings only, no 700, no Light. Emphasis is size, space, and ink-blue. Also skip its em-dash / ornamental-punctuation habits (see `AGENTS.md`, anti-patterns #28). Full cross-check: `references/design.md` §2 «External principles cross-check».
+- **Do NOT import multi-weight**: the guide wants Light/Regular/Medium/Bold; Kami serif is 400 body + 500 headings only, no 700, no Light. Emphasis is size, space, and ink-blue. Also skip its em-dash / ornamental-punctuation habits (see anti-patterns #28). Full cross-check: `references/design.md` §2 «External principles cross-check».
 
 ## Font stacks
 

@@ -4,7 +4,7 @@
     {
       "name": "kami-site",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8321"],
+      "runtimeArgs": ["-m", "http.server", "8321", "--directory", "site"],
       "port": 8321
     }
   ]

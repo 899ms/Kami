@@ -284,10 +284,16 @@ dependency.
 
 - `check.yml` has two jobs. `lint-and-test` runs dependency-light lint, metadata,
   and package gates. `verify-render` installs `weasyprint` / `pypdf` / `PyMuPDF` /
-  `Pygments`, sets up Node 22 and runs `bash scripts/ensure_mathjax.sh`, then runs
-  the full test suite before template verification. Tests that
-  need an optional render dependency use the suite's explicit `SKIP:` counter and
-  fail when a CI-required dependency is unavailable; never turn a skip into `OK:`.
+  `Pygments`, sets up Node 22 and runs `bash scripts/ensure_mathjax.sh`, then
+  installs the checkout with `npx skills add` under a throwaway `HOME` and asserts
+  the bare install is the kami skill alone (`SKILL.md` and `scripts/build.py`
+  present, no `index.html`, no `site/`, no `TsangerJinKai02-W04.ttf`, unpacked tree
+  under 6000 KB, a separate ceiling from the 6 MB ZIP limit under Refactor And
+  Packaging Hard Stops), which is why a layout or size regression surfaces under a
+  job named `render and verify`. It then runs the full test suite before template
+  verification. Tests that need an optional render dependency use the suite's
+  explicit `SKIP:` counter and fail when a CI-required dependency is unavailable;
+  never turn a skip into `OK:`.
 - Validate workflow edits with the CI run for the exact pushed commit on the authorized
   branch; do not create a feature branch solely for validation. A local pass does not
   prove CI font or dependency availability: check cache manifests, Ubuntu fallback

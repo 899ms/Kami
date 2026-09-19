@@ -213,7 +213,7 @@ A cross-check against Pierrick Calvez, "A Five-Minute Guide to Better Typography
 **Conflicts with Kami (do not import):**
 
 - **Multi-weight typeface families.** The guide advises choosing a face with many weights (Light, Regular, Medium, Bold) and orchestrating them. Kami forbids this for the serif: body is 400, headings are 500, and that is the whole range. No 700 (synthetic bold is banned), no Light. Emphasis is carried by size, space, and ink-blue, per «Weight» and invariant 5. Do not add a weight step to a Kami serif document.
-- **Western ornamental punctuation habits.** Editorial guides written for English print lean on the em dash and decorative punctuation. Kami constrains dashes and decoration deliberately: see the no-em-dash rule in `AGENTS.md`, `references/anti-patterns.md` #28, and the list-marker rule in «Lists» (no faux en-dash bullets). Do not import em-dash-heavy phrasing or ornamental marks from the guide.
+- **Western ornamental punctuation habits.** Editorial guides written for English print lean on the em dash and decorative punctuation. Kami constrains dashes and decoration deliberately: see the no-em-dash rule in `references/anti-patterns.md` #28 and the list-marker rule in «Lists» (no faux en-dash bullets). Do not import em-dash-heavy phrasing or ornamental marks from the guide.
 - **Do not reprint the guide.** Keep this a distilled cross-check. Do not paste a full translation or a substantial verbatim excerpt of the source into the repo.
 
 ---
@@ -1159,7 +1159,7 @@ Certain copy surfaces must render as one line; a wrap there reads as a defect, n
 - Single-line at 375px as well: key-fact tokens (price line, platform line, CTA labels, hero chips).
 - Check container geometry and forced breaks first, then shorten redundant wording without losing facts or approved meaning. Never shrink the font, force it with `<br>`, or shave padding to buy one word of width.
 - Any component whose height depends on its text (carousel captions, rotating taglines) must be verified with the longest shipped locale; a wrap that appears in one locale makes the component jump between slides.
-- One wrap found means sweeping every surface in this list across every locale, not fixing the reported spot (see `AGENTS.md` «Critical Line-Break Scan» for the PDF-side counterpart).
+- One wrap found means sweeping every surface in this list across every locale, not fixing the reported spot (the PDF-side counterpart is `python3 scripts/build.py --check-orphans` plus `--check-density`).
 
 ### Decorative layers
 
