@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # Kami
 
 Document-generation skill and template system. Editorial HTML templates plus a PDF / PPTX / PNG build pipeline.
