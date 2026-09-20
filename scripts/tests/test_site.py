@@ -7,6 +7,7 @@ import re
 from shared import TEMPLATES
 from site_facts import (
     FULL_PUBLIC_FACT_FILES,
+    SITE_VERSION_BADGE,
     REDIRECT_SITE_FILE,
     check_site_facts,
     public_path,
@@ -39,6 +40,43 @@ def test_site_facts_flags_bad_diagram_count() -> None:
     issues = site_fact_issues(files)
     check("public site facts flag stale diagram counts",
           any("index.html: missing diagram count 18" in issue for issue in issues),
+          f"issues: {issues}")
+
+
+def test_site_facts_flag_a_stale_second_version_badge() -> None:
+    """Each homepage prints the Kami version twice, in the eyebrow and in the
+    type sample. A presence-only check passed a page whose second badge still
+    read the previous release, so assert every badge, not just the first."""
+    files = site_fact_file_map()
+    page = files["index.html"]
+    badges = SITE_VERSION_BADGE.findall(page)
+    check("index.html carries both version badges", len(badges) == 2, f"found {badges}")
+
+    sample = '<div class="type-sample label">Design System \u00b7 v%s</div>'
+    stale = page.replace(sample % badges[0], sample % "0.9.9", 1)
+    check("mutating the type sample changed the page", stale != page)
+    files["index.html"] = stale
+    issues = site_fact_issues(files)
+    check("public site facts flag a stale type-sample version badge",
+          any("index.html: stale Kami version badge v0.9.9" in issue for issue in issues),
+          f"issues: {issues}")
+
+    eyebrow = "<span>Design System \u00b7 v%s<span class=\"eyebrow-date\">"
+    files = site_fact_file_map()
+    stale = files["index.html"].replace(eyebrow % badges[0], eyebrow % "0.9.9", 1)
+    check("mutating the eyebrow changed the page", stale != files["index.html"])
+    files["index.html"] = stale
+    issues = site_fact_issues(files)
+    check("public site facts flag a stale eyebrow version badge",
+          any("index.html: stale Kami version badge v0.9.9" in issue for issue in issues),
+          f"issues: {issues}")
+
+    # The same pages print the Claude Code minimum as "v2.1.142+"; it must not
+    # be read as a Kami badge, or every page would fail on a clean checkout.
+    files = site_fact_file_map()
+    issues = site_fact_issues(files)
+    check("the Claude Code minimum version is not read as a Kami badge",
+          not any("stale Kami version badge" in issue for issue in issues),
           f"issues: {issues}")
 
 
