@@ -24,9 +24,20 @@ screenshots. Everyday template, script, and site work does not need it.
   user ("Long-doc contents pages no longer print every number as 0"), not a noun
   category ("Long-doc contents"). The text after the colon carries the specifics: what
   used to happen, what happens now, and where the new behavior stops. Name the real
-  nouns, the template, the flag, the command. Measured against the maintainer's
-  hand-written releases in `tw93/Mole`, an item runs roughly 150 to 330 characters in
-  English and 60 to 110 in Chinese; a one-line item is the failure mode, not the target.
+  nouns, the template, the flag, the command.
+- One item is one sentence, in both languages. Every Chinese item carries exactly one
+  `。` at the end and chains its clauses with `，` and `、`; do not close each clause
+  with its own full stop. Measured across the last three `tw93/Mole` releases, 19 of 19
+  Chinese items have a single full stop and two to four commas. Length, from the same
+  sample: Chinese 60 to 100 characters, median 83; English 150 to 290, median 213. A
+  one-line item is the failure mode, and so is a three-sentence one.
+- Measure, do not estimate. Both times these numbers were eyeballed the result was
+  wrong by 30 percent, and V1.16.0 went out three times before it matched:
+
+  ```bash
+  gh release view V1.55.0 -R tw93/Mole --json body --jq .body | \
+    grep -E '^[0-9]+\. ' | awk '{print length": "$0}'
+  ```
 - Register is plain technical writing, in both languages. The first V1.16.0 rewrite
   overcorrected from generated prose into spoken Chinese: 照单全收, 顶上, 开工,
   不好看, 不再动你已有的. Mole uses none of that. No idioms, no spoken verbs, no
