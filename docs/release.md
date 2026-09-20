@@ -20,11 +20,13 @@ screenshots. Everyday template, script, and site work does not need it.
   anything that shipped to the site rather than into the package, since a site change
   is already live and needs no upgrade. Merging means folding the smaller outcomes into
   a larger one, never deleting them to hit the count.
-- Shape of one item: the bold label is itself a sentence saying what changed for the
-  user ("Long-doc contents pages no longer print every number as 0"), not a noun
-  category ("Long-doc contents"). The text after the colon carries the specifics: what
-  used to happen, what happens now, and where the new behavior stops. Name the real
-  nouns, the template, the flag, the command.
+- Shape of one item: the bold label is a short topic, 4 to 10 Chinese characters or
+  under 25 English ("长文目录页码", "Long-doc page numbers"), never a bolded sentence
+  and never two outcomes joined by a comma. Everything the reader needs sits after the
+  colon, unbolded: what used to happen, what happens now, and where the new behavior
+  stops. Name the real nouns, the template, the flag, the command. A noun label is only
+  a failure when the text after it is one compressed clause; carry the before and after
+  there and the short label reads fine. `tw93/mole-mac` v1.4.0 is the label reference.
 - One item is one sentence, in both languages. Every Chinese item carries exactly one
   `。` at the end and chains its clauses with `，` and `、`; do not close each clause
   with its own full stop. Measured across the last three `tw93/Mole` releases, 19 of 19
