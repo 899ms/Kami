@@ -320,6 +320,48 @@ def _check_font_sources(html_path: Path) -> list[str]:
     return missing
 
 
+TOC_TARGET_COUNTER = "target-counter(attr(href), page)"
+
+
+def _toc_page_number_issues(pdf_path: Path) -> list[str]:
+    """Cross-check every rendered TOC page number against the page its row links to.
+
+    WeasyPrint resolves `target-counter` at render time, so a failed resolution
+    still prints a well-formed numeral and every text-level gate accepts it.
+    WeasyPrint 70.0 does exactly that when the TOC anchor is a flex container:
+    each row renders `0`. Comparing the glyph against the link destination
+    catches both that failure and ordinary page-number drift.
+    """
+    try:
+        fitz = require_pymupdf()
+    except MissingDepError as exc:
+        print(f"  WARN: TOC page-number check skipped: {exc}")
+        return []
+
+    issues: list[str] = []
+    with fitz.open(str(pdf_path)) as doc:
+        for page in doc:
+            rows: dict[str, list] = {}
+            for link in page.get_links():
+                dest = link.get("nameddest")
+                if dest:
+                    rows.setdefault(dest, []).append(link)
+            for dest, links in sorted(rows.items()):
+                if len(links) < 2:
+                    # A plain inline link: no generated numeral box to compare.
+                    continue
+                numeral = min(links, key=lambda link: link["from"].width)
+                expected = numeral["page"] + 1
+                digits = re.findall(r"\d+", page.get_textbox(numeral["from"]))
+                if not digits:
+                    issues.append(f"TOC row '{dest}' renders no page number (links to page {expected})")
+                elif int(digits[-1]) != expected:
+                    issues.append(
+                        f"TOC row '{dest}' renders page {digits[-1]} but links to page {expected}"
+                    )
+    return issues
+
+
 def verify_target(name: str, source: str, max_pages: int, src_dir: Path) -> list[str]:
     """Render `source` to a PDF, then run page-count and font checks."""
     issues: list[str] = []
@@ -363,6 +405,10 @@ def verify_target(name: str, source: str, max_pages: int, src_dir: Path) -> list
         if "resume" in name and over == 1:
             hint = '; add class="resume--dense" to <body> or tighten .proj-text line-height to 1.38'
         issues.append(f"page overflow: {n} pages (limit {max_pages}){hint}")
+
+    # Rendered TOC page numbers (long-doc family)
+    if TOC_TARGET_COUNTER in src.read_text(encoding="utf-8"):
+        issues.extend(_toc_page_number_issues(out))
 
     # font check
     embedded = _pdf_font_names(out)

@@ -327,7 +327,10 @@ dependency.
   only when the template still holds an author placeholder. `/Producer` and `/Creator`
   stay `Kami`.
 - Long-doc TOCs use WeasyPrint `target-counter()` and stable chapter ids for rendered
-  page numbers; do not reintroduce hand-written `.toc-page` spans. Running headers
+  page numbers; do not reintroduce hand-written `.toc-page` spans. The row anchor must
+  stay `display: block` with the numeral floated right: WeasyPrint 70.0 resolves
+  `target-counter` to 0 on a flex anchor, and a `0` is valid-looking text that only the
+  `--verify` link cross-check catches (production.md pitfall 24). Running headers
   default to `h1`. If a filled document does not use `h1` for chapter titles, add
   `.running-title` to the element that should drive the header.
 - AI and public visibility spans `site/index*.html`, `site/llms.txt`, `site/robots.txt`,

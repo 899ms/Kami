@@ -57,6 +57,18 @@ def test_long_doc_templates_use_rendered_toc_pages_and_chapter_headers() -> None
         h2_block = re.search(r"(?m)^  h2\s*\{(?P<body>.*?)^  \}", text, re.S)
         if h2_block and "string-set:" in h2_block.group("body"):
             offenders.append(f"{source}: h2 still sets running header")
+        # WeasyPrint 70.0 resolves target-counter to 0 when the TOC anchor is a
+        # flex container, and the resulting page number reads as ordinary text.
+        # Match the declarations, not the words: the comment next to them in the
+        # template mentions both "flex" and "block".
+        toc_title = re.search(r"(?m)^  \.toc-title\s*\{(?P<body>.*?)^  \}", text, re.S)
+        if not toc_title or "display: block;" not in toc_title.group("body"):
+            offenders.append(f"{source}: .toc-title must be display: block")
+        elif "display: flex;" in toc_title.group("body"):
+            offenders.append(f"{source}: .toc-title is a flex container again")
+        toc_after = re.search(r"(?m)^  \.toc-title\[href\]::after\s*\{(?P<body>.*?)^  \}", text, re.S)
+        if not toc_after or "float: right;" not in toc_after.group("body"):
+            offenders.append(f"{source}: TOC page numeral must use float: right")
 
     check("long-doc templates use rendered TOC pages and chapter headers",
           not offenders,

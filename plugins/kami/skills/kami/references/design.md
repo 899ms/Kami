@@ -797,7 +797,9 @@ CSS alone cannot prevent "the last two lines of a chapter pushed onto a fresh pa
 
 Long-doc table-of-contents rows should link to stable chapter ids and use
 WeasyPrint `target-counter(attr(href), page)` for rendered page numbers. Do not
-hand-fill page numerals; any pagination-affecting edit will make them drift.
+hand-fill page numerals; any pagination-affecting edit will make them drift. Keep
+the row anchor a block and float the numeral right: a flex anchor makes WeasyPrint
+70.0 resolve every page number to 0 (production.md pitfall 24).
 
 **Cascading break-inside**: when two `break-inside: avoid` blocks sit next to each other and the first would split, both get pushed to the next page together. A chapter with more than two `break-inside: avoid` blocks (quote + table + callout, etc.) near a page boundary is at high risk of leaving 40-80mm of trailing whitespace on the previous page. Fix by splitting the chapter, or downgrade one block (allow the table to break with a repeating header `<thead>`).
 
