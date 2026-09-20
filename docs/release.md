@@ -27,6 +27,12 @@ screenshots. Everyday template, script, and site work does not need it.
   nouns, the template, the flag, the command. Measured against the maintainer's
   hand-written releases in `tw93/Mole`, an item runs roughly 150 to 330 characters in
   English and 60 to 110 in Chinese; a one-line item is the failure mode, not the target.
+- Register is plain technical writing, in both languages. The first V1.16.0 rewrite
+  overcorrected from generated prose into spoken Chinese: 照单全收, 顶上, 开工,
+  不好看, 不再动你已有的. Mole uses none of that. No idioms, no spoken verbs, no
+  second-person instruction voice; write 解析失败 over 没成功, 端点未正确附着 over
+  端点接错, 前置提问 over 开工前问. Precise technical nouns are what keeps an item
+  from reading as either a press release or a chat message.
 - The voice reference is `gh release view <tag> -R tw93/Mole`, not Kami's own older
   releases. A label that is an abstract category, an item with no before-and-after, and
   a subtitle that lists this release's themes are the three tells of a generated note.
