@@ -963,6 +963,25 @@ flex alignment:
 cross-checks each rendered numeral against the page its TOC row links to, so a
 `0` fails the build instead of shipping. Same substitution as the resume badge
 fix (`float: right` over `margin-left: auto`): it is stable across versions.
+Match each numeral to its containing row, not every link to the same destination:
+body cross-references are not TOC rows, and repeated destinations still need
+separate checks. CI renders all three long-doc variants even without a page ceiling.
+
+### 25. Korean text is extractable but absent in a PDF preview
+
+**Symptom**: a Source Han Serif KR PDF contains Korean text and embeds its font,
+but a MuPDF/PyMuPDF preview shows only Latin text and page numbers.
+
+**Root cause**: WeasyPrint's CID-keyed CFF font handling can produce different
+results across PDF readers. This is an [upstream compatibility limitation](https://github.com/Kozea/WeasyPrint/issues/1593),
+not proof of a missing font file. The same PDF can render correctly in Poppler
+while MuPDF omits the Korean glyphs; embedding the full font is not a reliable fix.
+
+**Verification**: compare the same page with `pdftoppm -f 2 -l 2 -png output.pdf preview`
+and inspect it in the recipient's PDF reader. Text extraction and embedded font
+names alone do not establish visible glyphs. Do not replace the template's typeface
+or shrink its layout to repair a preview. A successful Poppler render does not
+establish compatibility with MuPDF; keep that limit explicit in the handoff.
 
 ---
 

@@ -293,7 +293,7 @@ Pick the tier that matches the task. Default to the lowest tier that covers the 
 - **CSS stays untouched during content fill.** Layout adjustments go through the Layout-tweak tier (Step 3) and stay within spec; any real style change syncs `references/design.md` and the sibling templates, never a single file
 - Content follows `writing.md`: data over adjectives, distinctive phrasing over industry clichés
 - Avoid patterns listed in `references/anti-patterns.md`: emptiness, fabrication, mimicry, excess, source gaps, tone contamination, landing page, image slots, slides
-- **Before filling, read the quality bar for your document type** in `writing.md` section "Quality bars by document type". Structure is necessary but not sufficient: a resume bullet needs Action + Scope + Result + Business Outcome; an equity report needs variant perception + quantified catalysts; slides need assertion-evidence titles. Meeting the quality bar is as important as filling every placeholder.
+- **Before filling, read the quality bar for your document type** in `writing.md` section "Quality bars by document type". Structure is necessary but not sufficient: a resume bullet needs Action + Honest Scope + Observable Result, with business outcomes when relevant; an equity report needs variant perception + quantified catalysts; slides need assertion-evidence titles. Meeting the quality bar is as important as filling every placeholder.
 
 ### Do not generate
 
