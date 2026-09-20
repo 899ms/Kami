@@ -424,6 +424,65 @@ def test_verify_target_requires_exactly_two_resume_pages() -> None:
           repr(results))
 
 
+def test_toc_page_numbers_follow_individual_rows() -> None:
+    from optional_deps import require_weasyprint_html
+
+    try:
+        HTML = require_weasyprint_html()
+        require_pymupdf()
+    except MissingDepError as exc:
+        skip("rendered TOC row checks", str(exc), ci_required=True)
+        return
+
+    css = """@page { size: A4; margin: 20mm }
+        body { font: 12pt serif }
+        .toc-title { display: block; width: 300px }
+        .toc-title::after { content: target-counter(attr(href), page); float: right }
+        .bad::after { content: '9' }
+        .zero::after { content: '0' }
+        .missing::after { content: none }
+        h1 { break-before: page }"""
+    row = '<a class="toc-title" href="#chapter">Chapter</a>'
+    bad = '<a class="toc-title bad" href="#chapter">Chapter again</a>'
+    chapter = '<h1 id="chapter">Title</h1>'
+    cases = {
+        "correct row": (row + chapter, 0),
+        "wrong page number": (bad + chapter, 1),
+        "unresolved zero counter": (
+            '<a class="toc-title zero" href="#chapter">Chapter</a>' + chapter, 1),
+        "missing numeral": (
+            '<a class="toc-title missing" href="#chapter">Chapter</a>' + chapter, 1),
+        "repeated body references": (
+            row + chapter + '<p>See the <a href="#chapter">chapter heading</a> '
+            'and the <a href="#chapter">introduction</a>.</p>', 0),
+        "narrow inline reference": (
+            row + '<p>See <a href="#chapter">i</a>.</p>' + chapter, 0),
+        "styled inline references": (
+            row + chapter + '<p><a href="#chapter">Chapter <em>heading</em></a> '
+            '<a href="#chapter"><strong>Read</strong> introduction</a></p>', 0),
+        "styled numeric cross-reference": (
+            row + chapter + '<p><a href="#chapter">See section <strong>9</strong></a></p>', 0),
+        "repeated destination with one wrong row": (row + bad + chapter, 1),
+        "repeated destination with two wrong rows": (bad + bad + chapter, 2),
+        "wrapped title": (
+            '<a class="toc-title" href="#chapter">Chapter about a complicated '
+            'piece of research and methodology</a>' + chapter, 0),
+        "inline title markup and entities": (
+            '<a class="toc-title" href="#chapter">Research &amp; <em>methods</em></a>'
+            + chapter, 0),
+        "unused discretionary hyphen": (
+            '<a class="toc-title" href="#chapter">LongDocu&shy;ment Research</a>'
+            + chapter, 0),
+    }
+    with tempfile.TemporaryDirectory() as d:
+        pdf = Path(d) / "toc.pdf"
+        for name, (body, expected) in cases.items():
+            source = f"<style>{css}</style>{body}"
+            HTML(string=source).write_pdf(pdf)
+            issues = verify_mod._toc_page_number_issues(pdf, source)
+            check(f"TOC check: {name}", len(issues) == expected, repr(issues))
+
+
 def test_highlight_with_language() -> None:
     html = '<pre><code class="language-python">def foo():\n    pass</code></pre>'
     out = highlight_code_blocks(html)

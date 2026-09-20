@@ -291,7 +291,8 @@ dependency.
   under 6000 KB, a separate ceiling from the 6 MB ZIP limit under Refactor And
   Packaging Hard Stops), which is why a layout or size regression surfaces under a
   job named `render and verify`. It then runs the full test suite before template
-  verification. Tests that need an optional render dependency use the suite's
+  verification, including the three unlimited-page long-doc targets for rendered
+  TOC counters. Tests that need an optional render dependency use the suite's
   explicit `SKIP:` counter and fail when a CI-required dependency is unavailable;
   never turn a skip into `OK:`.
 - Validate workflow edits with the CI run for the exact pushed commit on the authorized

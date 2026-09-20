@@ -90,10 +90,11 @@ jobs:
       - name: Run full test suite with render dependencies
         run: python3 scripts/tests/test_build.py
 
-      - name: Verify hard page-count targets and editable PPTX decks
+      - name: Verify page counts, long-doc counters, and editable PPTX decks
         # Every HTML template with a non-zero registry ceiling runs here, so a
-        # newly registered hard-page target joins CI automatically. The same
-        # job builds both editable PPTX fallbacks through their installed
+        # newly registered hard-page target joins CI automatically.
+        # Long-docs have no page ceiling but must verify rendered TOC counters.
+        # The job builds both editable PPTX fallbacks through their installed
         # runtime dependency instead of only checking their source strings.
         # KAMI_ALLOW_FALLBACK_ONLY=1: CI does not ship commercial fonts
         # (TsangerJinKai02, Charter). Treat fallback-only embedding as a
@@ -109,7 +110,7 @@ jobs:
           from shared import HTML_TEMPLATES
 
           for name, spec in HTML_TEMPLATES.items():
-              if spec.build_max_pages:
+              if spec.build_max_pages or name.startswith("long-doc"):
                   subprocess.run(
                       [sys.executable, "skills/kami/scripts/build.py", "--verify", name],
                       check=True,

@@ -11,7 +11,10 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+import unicodedata
+from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import unquote
 
 from checks import _resume_balance_issues, scan_density
 from lint import scan_file
@@ -323,7 +326,34 @@ def _check_font_sources(html_path: Path) -> list[str]:
 TOC_TARGET_COUNTER = "target-counter(attr(href), page)"
 
 
-def _toc_page_number_issues(pdf_path: Path) -> list[str]:
+class _TocTitles(HTMLParser):
+    """Read the long-doc template's actual TOC entries, including inline markup."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.rows: list[tuple[str, str]] = []
+        self.target: str | None = None
+        self.parts: list[str] = []
+
+    def handle_starttag(self, tag, attributes):
+        attrs = dict(attributes)
+        if tag == "a" and "toc-title" in (attrs.get("class") or "").split():
+            href = attrs.get("href") or ""
+            if href.startswith("#"):
+                self.target = unquote(href[1:])
+                self.parts = []
+
+    def handle_data(self, data):
+        if self.target is not None:
+            self.parts.append(data)
+
+    def handle_endtag(self, tag):
+        if tag == "a" and self.target is not None:
+            self.rows.append((self.target, "".join(self.parts)))
+            self.target = None
+
+
+def _toc_page_number_issues(pdf_path: Path, source_html: str) -> list[str]:
     """Cross-check every rendered TOC page number against the page its row links to.
 
     WeasyPrint resolves `target-counter` at render time, so a failed resolution
@@ -338,27 +368,57 @@ def _toc_page_number_issues(pdf_path: Path) -> list[str]:
         print(f"  WARN: TOC page-number check skipped: {exc}")
         return []
 
-    issues: list[str] = []
+    parser = _TocTitles()
+    parser.feed(source_html)
+    parser.close()
+    if not parser.rows:
+        return []
+
+    def normalized(text):
+        # An unused discretionary hyphen is present in HTML but absent in PDF text.
+        return "".join(unicodedata.normalize("NFKC", text).replace("\u00ad", "").split())
+
+    candidates: list[tuple[str, str, str, int]] = []
     with fitz.open(str(pdf_path)) as doc:
         for page in doc:
-            rows: dict[str, list] = {}
+            destinations: dict[str, list] = {}
             for link in page.get_links():
                 dest = link.get("nameddest")
                 if dest:
-                    rows.setdefault(dest, []).append(link)
-            for dest, links in sorted(rows.items()):
-                if len(links) < 2:
-                    # A plain inline link: no generated numeral box to compare.
-                    continue
-                numeral = min(links, key=lambda link: link["from"].width)
-                expected = numeral["page"] + 1
-                digits = re.findall(r"\d+", page.get_textbox(numeral["from"]))
-                if not digits:
-                    issues.append(f"TOC row '{dest}' renders no page number (links to page {expected})")
-                elif int(digits[-1]) != expected:
-                    issues.append(
-                        f"TOC row '{dest}' renders page {digits[-1]} but links to page {expected}"
-                    )
+                    destinations.setdefault(dest, []).append(link)
+            for dest, links in sorted(destinations.items()):
+                for numeral in links:
+                    rect = numeral["from"]
+                    # A block TOC anchor emits a row-sized link and a contained
+                    # right-floated numeral. Styled inline links can also nest,
+                    # so geometry alone is not enough: match authored titles below.
+                    containers = [
+                        outer for outer in links
+                        if outer["from"].width > rect.width
+                        and rect in outer["from"]
+                        and abs(outer["from"].x1 - rect.x1) < 0.01
+                    ]
+                    if not containers:
+                        continue
+                    outer = min(containers, key=lambda link: link["from"].get_area())
+                    candidates.append((
+                        dest, normalized(page.get_textbox(outer["from"])),
+                        normalized(page.get_textbox(rect)), numeral["page"] + 1,
+                    ))
+
+    issues: list[str] = []
+    for dest, title in parser.rows:
+        title = normalized(title)
+        match = next((i for i, (target, row, number, _) in enumerate(candidates)
+                      if target == dest and row in (number + title, title + number)), None)
+        if match is None:
+            issues.append(f"TOC row '{dest}' has no rendered page-number link")
+            continue
+        _, _, number, expected = candidates.pop(match)
+        if not number.isdecimal():
+            issues.append(f"TOC row '{dest}' renders no page number (links to page {expected})")
+        elif int(number) != expected:
+            issues.append(f"TOC row '{dest}' renders page {number} but links to page {expected}")
     return issues
 
 
@@ -407,8 +467,9 @@ def verify_target(name: str, source: str, max_pages: int, src_dir: Path) -> list
         issues.append(f"page overflow: {n} pages (limit {max_pages}){hint}")
 
     # Rendered TOC page numbers (long-doc family)
-    if TOC_TARGET_COUNTER in src.read_text(encoding="utf-8"):
-        issues.extend(_toc_page_number_issues(out))
+    source_html = src.read_text(encoding="utf-8")
+    if TOC_TARGET_COUNTER in source_html:
+        issues.extend(_toc_page_number_issues(out, source_html))
 
     # font check
     embedded = _pdf_font_names(out)
