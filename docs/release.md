@@ -5,21 +5,35 @@ screenshots. Everyday template, script, and site work does not need it.
 
 ## Part 1 · Release notes
 
-- Read the previous published release first and treat it as a hard format template:
+- Read the previous published release first for the structure, not the prose:
   `gh release view $(gh release list -R tw93/Kami --limit 1 --json tagName --jq '.[0].tagName') -R tw93/Kami`.
-  Mirror its exact structure (centered logo block, `### Changelog`, `### 更新日志`,
-  closing tagline blockquote). Do not rebuild the shape from memory.
+  Mirror its exact shape (centered logo block, `### Changelog`, `### 更新日志`,
+  `### Thanks`, closing tagline blockquote). Do not rebuild the shape from memory. The
+  wording of the items comes from the voice reference below; releases before V1.16.0
+  carry the compressed one-line form that this section replaced.
 - Title shape: `V<x.y.z> <Two-Word Codename>`, for example `V1.7.2 Cleaner Resumes`.
 - Body: centered logo block + `### Changelog` (English numbered list) + `### 更新日志`
   (Chinese numbered list) + the closing tagline line.
-- Bilingual and one-to-one: one sentence per item, with the count determined by distinct user-visible changes, English item N maps to
-  Chinese item N. Fewer, denser items beat padding the list: group the commits by the
-  capability a user gains, and drop anything that shipped to the site rather than into
-  the package, since a site change is already live and needs no upgrade.
-- The budget is the rendered line, not the sentence. Each item must fit one line at
-  GitHub release-page width: roughly 90 characters English, 45 characters Chinese,
-  counting the number prefix and bold markers. Check the longest item first; if it
-  wraps, cut words instead of splitting the item.
+- Bilingual and one-to-one: English item N maps to Chinese item N, with the count
+  determined by distinct user-visible changes. At most five items. Fewer, denser items
+  beat padding the list: group the commits by the capability a user gains, and drop
+  anything that shipped to the site rather than into the package, since a site change
+  is already live and needs no upgrade. Merging means folding the smaller outcomes into
+  a larger one, never deleting them to hit the count.
+- Shape of one item: the bold label is itself a sentence saying what changed for the
+  user ("Long-doc contents pages no longer print every number as 0"), not a noun
+  category ("Long-doc contents"). The text after the colon carries the specifics: what
+  used to happen, what happens now, and where the new behavior stops. Name the real
+  nouns, the template, the flag, the command. Measured against the maintainer's
+  hand-written releases in `tw93/Mole`, an item runs roughly 150 to 330 characters in
+  English and 60 to 110 in Chinese; a one-line item is the failure mode, not the target.
+- The voice reference is `gh release view <tag> -R tw93/Mole`, not Kami's own older
+  releases. A label that is an abstract category, an item with no before-and-after, and
+  a subtitle that lists this release's themes are the three tells of a generated note.
+  The subtitle stays the product's fixed line, the way Mole keeps one across releases.
+- Close with `### Thanks` naming the issue reporters and PR contributors of this cycle
+  when there are any: `gh issue list --state closed` and `gh pr list --state merged`
+  filtered to the previous tag's date.
 - Generate the scaffold, then rewrite it:
   `python3 scripts/draft-release-notes.py V<prev>..HEAD --version V<new> --title "<Codename>"`.
   Regroup the raw commit list into product-themed bullets; never paste commit subjects.

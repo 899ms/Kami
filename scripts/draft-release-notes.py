@@ -3,7 +3,7 @@
 
 Pulls commit subjects in a rev range and pours them into the V1.4.0-style
 template (centered logo + bilingual changelog). The output is a starting
-point: regroup the commits into 5-8 product-themed bullets and translate
+point: regroup the commits into at most 5 product-themed bullets and translate
 each to Chinese before publishing.
 
 Usage:
@@ -101,7 +101,7 @@ def render(
     out.append(_HEADER.format(version=version, subtitle_en=subtitle_en))
     out.append(f"<!-- title: {version} {title} -->")
     out.append(f"<!-- range: {rev_range} ({len(commits)} commits) -->")
-    out.append("<!-- regroup the bullets below into 5-8 product-themed items -->")
+    out.append("<!-- regroup the bullets below into at most 5 product-themed items -->")
     out.append("")
     out.append("### Changelog")
     out.append("")
