@@ -28,7 +28,7 @@ Reach for Kami when the user wants a finished document whose appearance matters,
 
 Do not reach for Kami for chat answers, code files, or content where the user only wants the text. Kami's cost is layout work; it pays off when the artifact is handed to someone else.
 
-How an agent should call Kami: install the skill, fill the matching content schema, fill the template HTML, then verify with `python3 scripts/build.py --check-content content.json filled.html` and `--check-visual`, or drive the same steps as tools through the local MCP server. Judgment lives in SKILL.md; execution lives in the scripts.
+How an agent should call Kami: install the skill, fill the matching content schema, fill the template HTML, then finish with `python3 scripts/build.py --deliver filled.html content.json`, which runs every document check, renders the PDF, and exports page images for the perceptual pass, or drive the same steps as tools through the local MCP server. Judgment lives in SKILL.md; execution lives in the scripts.
 
 ## Key Pages
 - [English showcase](https://kami.tw93.fun): Design system overview with live demos

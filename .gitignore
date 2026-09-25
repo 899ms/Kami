@@ -25,3 +25,6 @@ skills/kami/assets/examples/
 
 # Legacy slides build artifact (current builds use skills/kami/assets/examples/)
 /output.pptx
+
+# Eval run output (claude plugin eval)
+/evals/results/

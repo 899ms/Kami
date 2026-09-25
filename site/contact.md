@@ -20,7 +20,7 @@ Include these details with a layout report.
 - The template name, for example `resume-en` or `slides-weasy`, and the Kami version from the homepage badge or `VERSION`.
 - How it was invoked: the Claude Code plugin, the Codex plugin, a Claude Desktop upload, the MCP server, or a direct `scripts/build.py` run.
 - The rendered artifact, a PDF or a page PNG, rather than a description of it. A screenshot helps show where the layout went wrong.
-- The output of the relevant check, for example `python3 scripts/build.py --check-content content.json filled.html`, if the document verified clean but still looks wrong.
+- The output of the relevant check, for example `python3 scripts/build.py --deliver filled.html content.json`, if the document verified clean but still looks wrong.
 
 For rendering failures, the exact error text matters: WeasyPrint, pypdf, and PyMuPDF are optional dependencies, and a missing one surfaces as an install hint rather than a crash. Include the full error message and any install hint.
 

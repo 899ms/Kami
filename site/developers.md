@@ -57,6 +57,7 @@ The second form reports coverage: fields that exist in the content object but ne
 
 ## Checks
 
+- `--deliver filled.html [content.json]` - every check below that applies to a finished document, in order, plus the PDF render and page images, ending in one READY or NOT READY verdict. This is the command an agent runs to finish.
 - `--check-placeholders` - unfilled template text still in the document.
 - `--check-markdown` - markdown syntax that leaked into the rendered output.
 - `--check-orphans` - single lines stranded at a page break.

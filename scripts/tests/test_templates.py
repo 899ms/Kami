@@ -1069,8 +1069,8 @@ def test_skill_routes_visual_repairs_and_generated_assets_without_losing_contrac
           )),
           "responsive reference lost viewport coverage")
     check("image generation routes from observed capability",
-          "Route from observed capability" in skill
-          and "Claude, Codex, most coding agents" not in skill,
+          "Route from observed capability" in diagrams
+          and "Claude, Codex, most coding agents" not in skill + diagrams,
           "host-name capability list still present")
     check("illustration brief keeps old visual system and adds semantic anchors",
           all(term in diagrams for term in (

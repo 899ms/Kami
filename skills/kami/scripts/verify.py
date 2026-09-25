@@ -591,6 +591,6 @@ def verify_all(target: str | None) -> int:
                         print(f"  {sparse} SPARSE page(s) (>{sparse_pct_disp}% trailing whitespace) across {scanned} PDF(s)")
                     if warn:
                         print(f"  {warn} WARN page(s) (>{warn_pct_disp}%) across {scanned} PDF(s)")
-                    print("  (advisory: re-author with SKILL.md Step 4.1 merge rule. Does not fail --verify.)")
+                    print("  (advisory: re-author with the writing.md «Page density» merge rule. Does not fail --verify.)")
 
     return 0 if failures == 0 else 1

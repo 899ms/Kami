@@ -30,7 +30,8 @@ One repository, three top-level roles, and the install tools only ever copy the 
   `package-skill.sh`, `release_gate.py`, `draft-release-notes.py`, `tests/`),
   `assets/fonts/` (the commercial TTFs; run `bash skills/kami/scripts/ensure-fonts.sh`
   once after cloning to copy them into the skill's ignored `assets/fonts/`, otherwise
-  templates fall back to jsDelivr), `docs/`, and `.github/`.
+  templates fall back to jsDelivr), `evals/` (the end-to-end skill eval suite, see
+  Evals below), `docs/`, and `.github/`.
 
 Run skill-side commands from `skills/kami/` (`cd skills/kami && python3
 scripts/build.py --check`); the paths below are written from that directory unless
@@ -72,6 +73,11 @@ Only the entries whose role is not obvious from the filename:
   never a second JSON source. Mark node rectangles, edge shafts and label masks;
   leave boundary frames and arrowheads unmarked. Static mask checks do not replace
   rendered text-fit and arrowhead inspection.
+- `scripts/deliver.py` - `build.py --deliver`, the one command `SKILL.md` gives an
+  agent to finish a document: every document gate in a fixed order, the render, page
+  images, and a single READY / NOT READY verdict. It owns the order; the individual
+  `--check-*` flags stay for debugging one gate. Template family comes from content IR
+  `type`, else from stylesheet overlap with the registered templates.
 - `scripts/html_visibility.py` - shared static HTML/CSS visibility analysis for
   `content.py` coverage and `checks.py` residue checks. Keep its conservative
   coverage and residue modes distinct; it does not implement browser layout.
@@ -141,6 +147,9 @@ python3 scripts/build_metadata.py --check    # drift check for the same
 bash scripts/package-skill.sh dist/kami.zip  # build the Claude Desktop archive from skills/kami
 python3 scripts/tests/test_build.py          # full test suite
 python3 scripts/draft-release-notes.py V1.4.0..HEAD --version V1.4.1 --title "Steadier Hand"
+claude plugin eval . --runs 2 --ablation none -j 4 --keep-temp --trust-plugin --no-publish \
+  --threshold 0 --judge-model sonnet --allow-tools Bash Write Edit   # end-to-end skill evals
+python3 evals/score.py                       # deterministic gates over the newest eval run
 # from skills/kami
 bash scripts/ensure-fonts.sh                 # recover missing or truncated CJK fonts
 python3 scripts/mcp_server.py                # MCP stdio server (render / check / screenshot)
@@ -148,6 +157,13 @@ python3 scripts/mermaid_normalize.py raw.svg -o clean.svg
 ```
 
 ## Working Rules
+
+- `SKILL.md` is loaded whole on every trigger, so it carries routing, the execution
+  contract, hard prohibitions, `--deliver`, and the feedback protocol, nothing else.
+  Type-specific procedure (page density, resume recruiter pass, landing site mode,
+  charts, illustrations) lives in the reference the tier table already sends the
+  agent to. Before adding a paragraph to `SKILL.md`, name the eval case it fixes;
+  before removing one, run the suite and compare against the last baseline.
 
 - Style changes must update `references/design.md` and the matching template tokens.
 - A CSS snippet in a reference doc is a shipped artifact, not prose: an agent copies
@@ -357,11 +373,33 @@ Applies before handing off any user-visible typeset deliverable (rendered PDF,
   changes must re-pass `python3 scripts/build.py --check` and the page-count
   contract.
 
+## Evals
+
+`evals/<case>/` holds end-to-end cases for `claude plugin eval`: a realistic request
+with invented data (`prompt.md`), and graders for skill trigger, PDF creation,
+unfilled placeholders, and an LLM read of fact fidelity in the HTML. `evals/score.py`
+then applies Kami's own gates to each kept run workspace (page contract, atomic facts
+in the PDF text, fonts, density, residue, style, resume balance), which the harness
+cannot run itself. One suite run is 12 document builds at roughly $1-3 each.
+
+- Run it after any change to `SKILL.md`, a reference the tier table routes to, a
+  template, or a gate an agent relies on, and compare against the previous run on the
+  same cases; one run per case is noise, use `--runs 2` or more.
+- The harness reads the plugin from `plugins/kami` live. Never run
+  `scripts/build_metadata.py` while a suite is running, and regenerate it before a run
+  so the suite tests the current skill.
+- A file grader takes an exact path; globs such as `*.html` fail with "path does not
+  exist". Every prompt pins its output file names for that reason.
+- Kept workspaces live under `/private/tmp/e-*/sealed/home/cwd` with mode 000;
+  `score.py` opens them itself. Results stay in the ignored `evals/results/`.
+- Mathematics is not covered: the sandbox cannot install the MathJax runtime.
+
 ## Verification
 
-`SKILL.md` Step 5 owns the document-side commands (render, placeholders, markdown
-residue, content IR, visual, rhythm, resume balance). This section covers the
-maintenance side only.
+`SKILL.md` «5 · Deliver» owns the document side: `build.py --deliver` runs every
+document gate (placeholders, math, residue, style, content coverage, render, page
+contract, resume balance, fonts, density, orphans, page images) in order and ends
+in one verdict. This section covers the maintenance side only.
 
 - Template or CSS changes: `python3 scripts/build.py --check` (CSS lint, token sync,
   base/variant cross-template `:root` consistency, currently CN to EN and CN to KO)

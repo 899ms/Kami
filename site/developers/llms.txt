@@ -21,6 +21,7 @@ Reach for Kami when a user wants a finished document whose appearance matters: r
 - Coverage into the filled document: `python3 scripts/build.py --check-content content.json filled.html`
 
 ## Verification
+- Finish a document: `python3 scripts/build.py --deliver filled.html content.json` runs the checks below in order, renders the PDF, exports page images, and ends in one READY / NOT READY verdict
 - Deterministic: `--check-placeholders`, `--check-markdown`, `--check-orphans`, `--check-density`, `--check-rhythm`, `--check-resume-balance`
 - Perceptual: `--check-visual` exports page images with a fixed review checklist
 - Repository-wide: `python3 scripts/build.py --check` (template lint, token sync, public-fact drift)

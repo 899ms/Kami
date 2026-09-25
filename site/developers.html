@@ -125,6 +125,7 @@ python3 scripts/build.py --check-content content.json filled.html</pre>
       <h2 class="section-title">Document checks</h2>
     </div>
     <ul>
+      <li><code>--deliver filled.html [content.json]</code> - every check below that applies to a finished document, in order, plus the PDF render and page images, ending in one READY or NOT READY verdict. This is the command an agent runs to finish.</li>
       <li><code>--check-placeholders</code> - unfilled template text still in the document.</li>
       <li><code>--check-markdown</code> - markdown syntax that leaked into the rendered output.</li>
       <li><code>--check-orphans</code> - single lines stranded at a page break.</li>
