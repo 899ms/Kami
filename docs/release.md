@@ -27,6 +27,12 @@ screenshots. Everyday template, script, and site work does not need it.
   stops. Name the real nouns, the template, the flag, the command. A noun label is only
   a failure when the text after it is one compressed clause; carry the before and after
   there and the short label reads fine. `tw93/mole-mac` v1.4.0 is the label reference.
+  The label names the capability, not an action slogan or an adjective: 统一交付检查
+  over 一条命令收尾, 按需加载规范 over 技能更轻. The before state is behavior a user
+  could have observed; an observation from the maintainer's own eval runs ("resume
+  balance was often skipped") belongs in the commit, not the note. The after state names
+  the concrete output (给出 READY 或 NOT READY 结论), never a paraphrase of it
+  (给出能否交付的结论).
 - One item is one sentence, in both languages. Every Chinese item carries exactly one
   `。` at the end and chains its clauses with `，` and `、`; do not close each clause
   with its own full stop. Measured across the last three `tw93/Mole` releases, 19 of 19
@@ -42,10 +48,11 @@ screenshots. Everyday template, script, and site work does not need it.
   ```
 - Register is plain technical writing, in both languages. The first V1.16.0 rewrite
   overcorrected from generated prose into spoken Chinese: 照单全收, 顶上, 开工,
-  不好看, 不再动你已有的. Mole uses none of that. No idioms, no spoken verbs, no
-  second-person instruction voice; write 解析失败 over 没成功, 端点未正确附着 over
-  端点接错, 前置提问 over 开工前问. Precise technical nouns are what keeps an item
-  from reading as either a press release or a chat message.
+  不好看, 不再动你已有的; V1.17.0 needed a second pass for 收尾, 跑完, 漏掉, 落到.
+  Mole uses none of that. No idioms, no spoken verbs, no second-person instruction
+  voice; write 解析失败 over 没成功, 端点未正确附着 over 端点接错, 前置提问 over
+  开工前问, 执行全部检查 over 跑完, 回退为黑体 over 落到黑体. Precise technical nouns
+  are what keeps an item from reading as either a press release or a chat message.
 - The voice reference is `gh release view <tag> -R tw93/Mole`, not Kami's own older
   releases. A label that is an abstract category, an item with no before-and-after, and
   a subtitle that lists this release's themes are the three tells of a generated note.
