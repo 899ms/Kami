@@ -149,6 +149,10 @@ def test_classify_cjk_font_separates_serif_from_the_rest() -> None:
         "PingFang-SC": "other",
         "NotoSansCJKsc-Regular": "other",
         "SourceHanSansSC-Regular": "other",
+        # Korean Myeongjo is a serif; the KO stacks fall back to it offline.
+        "ABCDEF+Nanum-Myeongjo": "serif",
+        "AppleMyungjo": "serif",
+        "AppleSDGothicNeo-Regular": "other",
     }
     offenders = [
         f"{name} -> {_classify_cjk_font(name)} (want {want})"
@@ -201,6 +205,42 @@ def test_density_scans_the_only_page_of_a_single_page_pdf() -> None:
     check("single-page PDF is scanned when passed explicitly",
           sum(explicit_scan[:2]) > 0,
           f"scan: {explicit_scan} (fixture leaves ~64% of the page empty)")
+
+
+def test_density_judges_the_last_page_against_the_closing_ceiling() -> None:
+    """A document may close on a short last page; a short middle page is a defect."""
+    try:
+        fitz = require_pymupdf()
+    except MissingDepError as exc:
+        skip("last-page density exemption", str(exc), ci_required=True)
+        return
+
+    def page_with_ink(doc, bottom: float) -> None:
+        page = doc.new_page(width=595, height=842)
+        parchment = tuple(channel / 255 for channel in PARCHMENT_RGB)
+        page.draw_rect(fitz.Rect(0, 0, 595, 842), color=parchment, fill=parchment)
+        page.draw_rect(fitz.Rect(50, 50, 545, bottom), color=(0.1, 0.1, 0.1), fill=(0.1, 0.1, 0.1))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        results = {}
+        # (middle page ink bottom, last page ink bottom) in points of 842
+        for name, middle, last in (("short-last", 800, 460), ("empty-last", 800, 200), ("short-middle", 460, 800)):
+            pdf = Path(tmp) / f"{name}.pdf"
+            doc = fitz.open()
+            page_with_ink(doc, 800)   # cover, always exempt
+            page_with_ink(doc, middle)
+            page_with_ink(doc, last)
+            doc.save(str(pdf))
+            doc.close()
+            results[name] = silently(scan_density, [str(pdf)])
+    if any(value is None for value in results.values()):
+        return
+    check("a last page ~45% empty is an accepted closing page", sum(results["short-last"][:2]) == 0,
+          f"scan: {results['short-last']}")
+    check("a last page ~76% empty is still reported", results["empty-last"][0] == 1,
+          f"scan: {results['empty-last']}")
+    check("a middle page ~45% empty is still a warning", results["short-middle"][1] == 1,
+          f"scan: {results['short-middle']}")
 
 
 def test_parse_slide_sequence_empty() -> None:

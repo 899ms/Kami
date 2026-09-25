@@ -1189,3 +1189,18 @@ def test_visibility_resolves_document_custom_properties() -> None:
           all("SHOWN" in text and not ambiguous
               for text, ambiguous in benign_results),
           repr(benign_results))
+
+
+def test_every_template_passes_its_own_document_style_check() -> None:
+    """--check-style judges a produced document by the template rule set, so a
+    template that fails it hands every user a finding they did not cause. The
+    CN and KO resumes shipped `.team-culture` on --brand-tint beside an --ivory
+    `.os-highlight`, and every filled resume that kept both failed the check."""
+    from lint import check_style
+
+    sources = [spec.source for spec in HTML_TEMPLATES.values()] + list(SCREEN_TEMPLATES.values())
+    failing = [
+        source for source in sources
+        if silently(check_style, [str(TEMPLATES / source)]) != 0
+    ]
+    check("every shipped template passes --check-style", not failing, ", ".join(failing))

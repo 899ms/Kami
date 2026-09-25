@@ -1457,8 +1457,8 @@ Canonical values (verified during the `one-pager-ko` pilot, 2026-05-28):
 Fallback chain (consistent across all KO templates):
 
 ```css
---serif: "Source Han Serif K", "Source Han Serif KR", "Noto Serif KR", "Apple SD Gothic Neo",
-         "AppleMyungjo", Charter, Georgia, serif;
+--serif: "Source Han Serif K", "Source Han Serif KR", "Noto Serif KR", "Nanum Myeongjo",
+         "AppleMyungjo", "Apple SD Gothic Neo", Charter, Georgia, serif;
 --sans:  var(--serif);
 --mono:  "JetBrains Mono", "D2Coding", "SF Mono", "Fira Code",
          Consolas, Monaco, monospace;
